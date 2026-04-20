@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const productsController = require('../controllers/products.controller');
-const authMiddleware = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/auth');
 
 // Configuração do Multer para upload de imagens
 const storage = multer.diskStorage({
@@ -19,12 +19,12 @@ const upload = multer({ storage: storage });
 
 // Rotas da Vitrine / Admin
 router.get('/', productsController.getAll);
-router.post('/', authMiddleware, productsController.create);
+router.post('/', authMiddleware, adminOnly, productsController.create);
 router.get('/:id', productsController.getById);
-router.put('/:id', authMiddleware, productsController.update);
+router.put('/:id', authMiddleware, adminOnly, productsController.update);
 
 // Rotas de Variações e Imagens
-router.post('/:id/variations', authMiddleware, productsController.addVariation);
-router.post('/:id/images', authMiddleware, upload.array('images', 5), productsController.uploadImage);
+router.post('/:id/variations', authMiddleware, adminOnly, productsController.addVariation);
+router.post('/:id/images', authMiddleware, adminOnly, upload.array('images', 5), productsController.uploadImage);
 
 module.exports = router;

@@ -8,13 +8,11 @@ function authMiddleware(req, res, next) {
     }
 
     const parts = authHeader.split(' ');
-
     if (parts.length !== 2) {
         return res.status(401).json({ error: 'Erro de token.' });
     }
 
     const [scheme, token] = parts;
-
     if (!/^Bearer$/i.test(scheme)) {
         return res.status(401).json({ error: 'Token mal formatado.' });
     }
@@ -24,10 +22,19 @@ function authMiddleware(req, res, next) {
             return res.status(401).json({ error: 'Token inválido ou expirado.' });
         }
 
-        req.userId = decoded.id;
-        req.username = decoded.username;
+        // Armazena os dados decodificados (id, name, role) no req.user
+        req.user = decoded; 
         return next();
     });
 }
 
-module.exports = authMiddleware;
+// Middleware específico para admin (exige que role seja 'admin')
+function adminOnly(req, res, next) {
+    if (req.user && req.user.role === 'admin') {
+        return next();
+    }
+    
+    return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem realizar esta ação.' });
+}
+
+module.exports = { authMiddleware, adminOnly };

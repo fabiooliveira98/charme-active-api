@@ -84,6 +84,11 @@ const ProductModel = {
     async delete(id) {
         await db.query('DELETE FROM products WHERE id = ?', [id]);
         return true;
+    },
+    async decreaseStock(variationId, quantity) {
+        const query = `UPDATE product_variations SET quantity = quantity - ? WHERE id = ? AND quantity >= ?`;
+        const [result] = await db.query(query, [quantity, variationId, quantity]);
+        return result.affectedRows > 0;
     }
 };
 
